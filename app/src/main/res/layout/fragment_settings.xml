@@ -16,31 +16,34 @@
 
 
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/appCenterCard"
             style="?attr/materialCardViewElevatedStyle"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
-
+                android:paddingStart="16dp"
+                android:paddingTop="16dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="8dp">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/title_app_center"
+                    android:text="@string/title_app_settings"
+                    android:layout_marginBottom="8dp"
                     android:textAppearance="?attr/textAppearanceTitleLarge" />
 
-
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/appCenterEnabled"
+                    android:id="@+id/dynamicNotificationEnabled"
                     style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:hint="@string/enabled">
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:hint="@string/dynamic_notification">
 
                     <AutoCompleteTextView
                         android:layout_width="match_parent"
@@ -56,8 +59,7 @@
                     style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:hint="@string/check_update">
+                    android:hint="@string/check_update_automatic">
 
                     <AutoCompleteTextView
                         android:layout_width="match_parent"
@@ -67,6 +69,20 @@
                         app:simpleItems="@array/enabled" />
 
                 </com.google.android.material.textfield.TextInputLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical|end"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/checkUpdateButton"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/check_update" />
+                </LinearLayout>
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -95,27 +111,11 @@
 
                 </TextView>
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/disableMemoryLimit"
-                    style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:hint="@string/memory_limit">
-
-                    <AutoCompleteTextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="none"
-                        android:text="@string/enabled"
-                        app:simpleItems="@array/enabled" />
-
-                </com.google.android.material.textfield.TextInputLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp">
+                    android:layout_marginTop="8dp">
 
                     <TextView
                         style="?attr/textAppearanceTitleSmall"
@@ -154,10 +154,27 @@
 
                 </LinearLayout>
 
-                <LinearLayout
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/disableMemoryLimit"
+                    style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
+                    android:hint="@string/memory_limit">
+
+                    <AutoCompleteTextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:text="@string/enabled"
+                        app:simpleItems="@array/enabled" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:gravity="center_vertical|end"
                     android:orientation="horizontal">
 

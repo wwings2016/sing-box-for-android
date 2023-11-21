@@ -4,9 +4,9 @@ object SettingsKey {
 
     const val SELECTED_PROFILE = "selected_profile"
     const val SERVICE_MODE = "service_mode"
-    const val ANALYTICS_ALLOWED = "analytics_allowed"
     const val CHECK_UPDATE_ENABLED = "check_update_enabled"
     const val DISABLE_MEMORY_LIMIT = "disable_memory_limit"
+    const val DYNAMIC_NOTIFICATION = "dynamic_notification"
 
     const val PER_APP_PROXY_ENABLED = "per_app_proxy_enabled"
     const val PER_APP_PROXY_MODE = "per_app_proxy_mode"

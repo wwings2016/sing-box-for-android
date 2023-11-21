@@ -9,10 +9,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.microsoft.appcenter.AppCenter
-import com.microsoft.appcenter.distribute.Distribute
 import io.nekohasekai.libbox.Libbox
 import io.nekohasekai.sfa.Application
 import io.nekohasekai.sfa.R
@@ -26,6 +25,7 @@ import io.nekohasekai.sfa.ktx.text
 import io.nekohasekai.sfa.ui.MainActivity
 import io.nekohasekai.sfa.ui.debug.DebugActivity
 import io.nekohasekai.sfa.ui.profileoverride.ProfileOverrideActivity
+import io.nekohasekai.sfa.vendor.Vendor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -60,32 +60,18 @@ class SettingsFragment : Fragment() {
                 reloadSettings()
             }
         }
-        binding.appCenterEnabled.addTextChangedListener {
-            lifecycleScope.launch(Dispatchers.IO) {
-                val allowed = EnabledType.valueOf(it).boolValue
-                Settings.analyticsAllowed =
-                    if (allowed) Settings.ANALYSIS_ALLOWED else Settings.ANALYSIS_DISALLOWED
-                withContext(Dispatchers.Main) {
-                    binding.checkUpdateEnabled.isEnabled = allowed
-                }
-                if (!allowed) {
-                    AppCenter.setEnabled(false)
-                } else {
-                    if (!AppCenter.isConfigured()) {
-                        activity.startAnalysisInternal()
-                    }
-                    AppCenter.setEnabled(true)
-                }
-            }
+        if (!Vendor.checkUpdateAvailable()) {
+            binding.checkUpdateEnabled.isVisible = false
+            binding.checkUpdateButton.isVisible = false
         }
         binding.checkUpdateEnabled.addTextChangedListener {
             lifecycleScope.launch(Dispatchers.IO) {
                 val newValue = EnabledType.valueOf(it).boolValue
                 Settings.checkUpdateEnabled = newValue
-                if (!newValue) {
-                    Distribute.disableAutomaticCheckForUpdate()
-                }
             }
+        }
+        binding.checkUpdateButton.setOnClickListener {
+            Vendor.checkUpdate(activity, true)
         }
         binding.disableMemoryLimit.addTextChangedListener {
             lifecycleScope.launch(Dispatchers.IO) {
@@ -93,6 +79,13 @@ class SettingsFragment : Fragment() {
                 Settings.disableMemoryLimit = !newValue
             }
         }
+        binding.dynamicNotificationEnabled.addTextChangedListener {
+            lifecycleScope.launch(Dispatchers.IO) {
+                val newValue = EnabledType.valueOf(it).boolValue
+                Settings.dynamicNotification = newValue
+            }
+        }
+
         binding.dontKillMyAppButton.setOnClickListener {
             it.context.launchCustomTab("https://dontkillmyapp.com/")
         }
@@ -128,23 +121,22 @@ class SettingsFragment : Fragment() {
             (activity.getExternalFilesDir(null) ?: activity.filesDir)
                 .walkTopDown().filter { it.isFile }.map { it.length() }.sum()
         )
-        val appCenterEnabled = Settings.analyticsAllowed == Settings.ANALYSIS_ALLOWED
         val checkUpdateEnabled = Settings.checkUpdateEnabled
-        val removeBackgroudPermissionPage = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        val removeBackgroundPermissionPage = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             Application.powerManager.isIgnoringBatteryOptimizations(Application.application.packageName)
         } else {
             true
         }
+        val dynamicNotification = Settings.dynamicNotification
         withContext(Dispatchers.Main) {
             binding.dataSizeText.text = dataSize
-            binding.appCenterEnabled.text = EnabledType.from(appCenterEnabled).name
-            binding.appCenterEnabled.setSimpleItems(R.array.enabled)
-            binding.checkUpdateEnabled.isEnabled = appCenterEnabled
             binding.checkUpdateEnabled.text = EnabledType.from(checkUpdateEnabled).name
             binding.checkUpdateEnabled.setSimpleItems(R.array.enabled)
             binding.disableMemoryLimit.text = EnabledType.from(!Settings.disableMemoryLimit).name
             binding.disableMemoryLimit.setSimpleItems(R.array.enabled)
-            binding.backgroundPermissionCard.isGone = removeBackgroudPermissionPage
+            binding.backgroundPermissionCard.isGone = removeBackgroundPermissionPage
+            binding.dynamicNotificationEnabled.text = EnabledType.from(dynamicNotification).name
+            binding.dynamicNotificationEnabled.setSimpleItems(R.array.enabled)
         }
     }
 

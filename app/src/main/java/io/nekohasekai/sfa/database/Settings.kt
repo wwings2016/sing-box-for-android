@@ -38,13 +38,9 @@ object Settings {
     var serviceMode by dataStore.string(SettingsKey.SERVICE_MODE) { ServiceMode.NORMAL }
     var startedByUser by dataStore.boolean(SettingsKey.STARTED_BY_USER)
 
-    const val ANALYSIS_UNKNOWN = -1
-    const val ANALYSIS_ALLOWED = 0
-    const val ANALYSIS_DISALLOWED = 1
-
-    var analyticsAllowed by dataStore.int(SettingsKey.ANALYTICS_ALLOWED) { ANALYSIS_UNKNOWN }
     var checkUpdateEnabled by dataStore.boolean(SettingsKey.CHECK_UPDATE_ENABLED) { true }
     var disableMemoryLimit by dataStore.boolean(SettingsKey.DISABLE_MEMORY_LIMIT)
+    var dynamicNotification by dataStore.boolean(SettingsKey.DYNAMIC_NOTIFICATION) { true }
 
 
     const val PER_APP_PROXY_DISABLED = 0

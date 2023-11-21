@@ -66,14 +66,44 @@ class OverviewFragment : Fragment() {
         binding.profileList.addItemDecoration(divider)
         activity.serviceStatus.observe(viewLifecycleOwner) {
             binding.statusContainer.isVisible = it == Status.Starting || it == Status.Started
-            if (it == Status.Stopped) {
-                binding.clashModeCard.isVisible = false
-                binding.systemProxyCard.isVisible = false
+            when (it) {
+                Status.Stopped -> {
+                    binding.clashModeCard.isVisible = false
+                    binding.systemProxyCard.isVisible = false
+                    binding.fab.setImageResource(R.drawable.ic_play_arrow_24)
+                    binding.fab.show()
+                }
+
+                Status.Starting -> {
+                    binding.fab.hide()
+                }
+
+                Status.Started -> {
+                    statusClient.connect()
+                    clashModeClient.connect()
+                    reloadSystemProxyStatus()
+                    binding.fab.setImageResource(R.drawable.ic_stop_24)
+                    binding.fab.show()
+                }
+
+                Status.Stopping -> {
+                    binding.fab.hide()
+                }
+
+                else -> {}
             }
-            if (it == Status.Started) {
-                statusClient.connect()
-                clashModeClient.connect()
-                reloadSystemProxyStatus()
+        }
+        binding.fab.setOnClickListener {
+            when (activity.serviceStatus.value) {
+                Status.Stopped -> {
+                    activity.startService()
+                }
+
+                Status.Started -> {
+                    BoxService.stop()
+                }
+
+                else -> {}
             }
         }
         ProfileManager.registerCallback(this::updateProfiles)
@@ -98,11 +128,11 @@ class OverviewFragment : Fragment() {
             val status = Libbox.newStandaloneCommandClient().systemProxyStatus
             withContext(Dispatchers.Main) {
                 binding.systemProxyCard.isVisible = status.available
-                binding.systemProxyCard.isEnabled = true
                 binding.systemProxySwitch.setOnClickListener(null)
                 binding.systemProxySwitch.isChecked = status.enabled
+                binding.systemProxySwitch.isEnabled = true
                 binding.systemProxySwitch.setOnCheckedChangeListener { buttonView, isChecked ->
-                    binding.systemProxyCard.isEnabled = false
+                    binding.systemProxySwitch.isEnabled = false
                     lifecycleScope.launch(Dispatchers.IO) {
                         Settings.systemProxyEnabled = isChecked
                         runCatching {
@@ -247,7 +277,7 @@ class OverviewFragment : Fragment() {
 
     class Adapter(
         internal val scope: CoroutineScope,
-        private val parent: FragmentDashboardOverviewBinding
+        internal val parent: FragmentDashboardOverviewBinding
     ) :
         RecyclerView.Adapter<Holder>() {
 
@@ -312,6 +342,7 @@ class OverviewFragment : Fragment() {
             binding.profileSelected.isChecked = profile.id == adapter.selectedProfileID
             binding.profileSelected.setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) {
+                    adapter.parent.profileList.isClickable = false
                     adapter.selectedProfileID = profile.id
                     adapter.lastSelectedIndex?.let { index ->
                         adapter.notifyItemChanged(index)
@@ -319,6 +350,9 @@ class OverviewFragment : Fragment() {
                     adapter.lastSelectedIndex = adapterPosition
                     adapter.scope.launch(Dispatchers.IO) {
                         switchProfile(profile)
+                        withContext(Dispatchers.Main) {
+                            adapter.parent.profileList.isEnabled = true
+                        }
                     }
                 }
             }
@@ -338,7 +372,7 @@ class OverviewFragment : Fragment() {
             if (restart) {
                 mainActivity.reconnect()
                 BoxService.stop()
-                delay(200L)
+                delay(1000L)
                 mainActivity.startService()
                 return
             }

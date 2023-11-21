@@ -2,6 +2,8 @@
     <string name="app_name">sing-box</string>
 
     <string name="stop">Stop</string>
+    <string name="ok">Ok</string>
+    <string name="no_thanks">No, thanks</string>
 
     <string name="title_dashboard">Dashboard</string>
     <string name="title_configuration">Profiles</string>
@@ -79,16 +81,11 @@
     <string name="profile">Profile</string>
     <string name="core_version">Version</string>
     <string name="core">Core</string>
+    <string name="dynamic_notification">Display realtime speed in notification</string>
     <string name="core_data_size">Data Size</string>
-    <string name="analytics_title">Analytics</string>
-    <string name="analytics_message">Would you like to give SFA permission to collect analytics, send crash reports, and check update through AppCenter?</string>
-    <string name="no_thanks">No, thanks</string>
+    <string name="check_update_automatic">Automatic Update Check</string>
     <string name="check_update">Check Update</string>
-    <string name="title_app_center">App Center</string>
-    <string name="title_feedback">Feedback</string>
-    <string name="message">Message</string>
-    <string name="send">Send</string>
-    <string name="send_feedback">Send Feedback</string>
+    <string name="title_app_settings">App</string>
     <string name="about_title">About</string>
     <string name="app_description">Android client for sing-box, the universal proxy platform.</string>
     <string name="documentation_button">Documentation</string>
@@ -97,7 +94,7 @@
     <string name="background_permission">Background permission</string>
     <string name="background_permission_description">Apply for the necessary permissions in order for the VPN to function properly.\n\nIf you are using a device made by a Chinese company, the card may not disappear after the permission is granted.</string>
     <string name="read_more">Read More</string>
-    <string name="request_background_permission">Ignore battery optimizations</string>
+    <string name="request_background_permission">Ignore Battery Optimizations</string>
     <string name="import_remote_profile">Import remote profile</string>
     <string name="import_remote_profile_message">Are you sure to import remote profile %s? You will connect to %s to download the configuration.</string>
 
@@ -145,5 +142,7 @@
     <string name="vpn_golang_version">Go Version</string>
     <string name="vpn_app_type_other">Other</string>
     <string name="vpn_core_type_unknown">Unknown</string>
+    <string name="no_updates_available">No updates available</string>
+
 
 </resources>

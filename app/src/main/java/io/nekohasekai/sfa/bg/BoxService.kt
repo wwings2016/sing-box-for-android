@@ -17,7 +17,6 @@ import io.nekohasekai.libbox.BoxService
 import io.nekohasekai.libbox.CommandServer
 import io.nekohasekai.libbox.CommandServerHandler
 import io.nekohasekai.libbox.Libbox
-import io.nekohasekai.libbox.PProfServer
 import io.nekohasekai.libbox.PlatformInterface
 import io.nekohasekai.libbox.SystemProxyStatus
 import io.nekohasekai.sfa.Application
@@ -86,10 +85,9 @@ class BoxService(
 
     private val status = MutableLiveData(Status.Stopped)
     private val binder = ServiceBinder(status)
-    private val notification = ServiceNotification(service)
+    private val notification = ServiceNotification(status, service)
     private var boxService: BoxService? = null
     private var commandServer: CommandServer? = null
-    private var pprofServer: PProfServer? = null
     private var receiverRegistered = false
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -118,6 +116,7 @@ class BoxService(
         this.commandServer = commandServer
     }
 
+    private var lastProfileName = ""
     private suspend fun startService(delayStart: Boolean = false) {
         try {
             val selectedProfileId = Settings.selectedProfile
@@ -138,6 +137,7 @@ class BoxService(
                 return
             }
 
+            lastProfileName = profile.name
             withContext(Dispatchers.Main) {
                 binder.broadcast {
                     it.onServiceResetLogs(listOf())
@@ -156,13 +156,17 @@ class BoxService(
             }
 
             if (delayStart) {
-                delay(200L)
+                delay(1000L)
             }
 
             newService.start()
             boxService = newService
             commandServer?.setService(boxService)
             status.postValue(Status.Started)
+
+            withContext(Dispatchers.Main) {
+                notification.show(lastProfileName)
+            }
         } catch (e: Exception) {
             stopAndAlert(Alert.StartService, e.message)
             return
@@ -170,23 +174,24 @@ class BoxService(
     }
 
     override fun serviceReload() {
+        notification.close()
         status.postValue(Status.Starting)
-        GlobalScope.launch(Dispatchers.IO) {
-            val pfd = fileDescriptor
-            if (pfd != null) {
-                pfd.close()
-                fileDescriptor = null
+        val pfd = fileDescriptor
+        if (pfd != null) {
+            pfd.close()
+            fileDescriptor = null
+        }
+        commandServer?.setService(null)
+        boxService?.apply {
+            runCatching {
+                close()
+            }.onFailure {
+                writeLog("service: error when closing: $it")
             }
-            commandServer?.setService(null)
-            boxService?.apply {
-                runCatching {
-                    close()
-                }.onFailure {
-                    writeLog("service: error when closing: $it")
-                }
-                Seq.destroyRef(refnum)
-            }
-            boxService = null
+            Seq.destroyRef(refnum)
+        }
+        boxService = null
+        runBlocking {
             startService(true)
         }
     }
@@ -283,7 +288,6 @@ class BoxService(
             receiverRegistered = true
         }
 
-        notification.show()
         GlobalScope.launch(Dispatchers.IO) {
             Settings.startedByUser = true
             initialize()

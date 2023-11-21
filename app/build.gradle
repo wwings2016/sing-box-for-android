@@ -5,6 +5,7 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-parcelize'
     id 'com.google.devtools.ksp'
+    id 'com.github.triplet.play'
 }
 
 android {
@@ -39,13 +40,19 @@ android {
             if (getProps("KEYSTORE_PASS") != "") {
                 signingConfig signingConfigs.release
             }
-            buildConfigField("String", "APPCENTER_SECRET", "\"" + getProps("APPCENTER_SECRET") + "\"")
         }
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
-            buildConfigField("String", "APPCENTER_SECRET", "\"" + getProps("APPCENTER_SECRET") + "\"")
+        }
+    }
+
+    flavorDimensions "vendor"
+    productFlavors {
+        play {
+        }
+        other {
         }
     }
 
@@ -69,6 +76,8 @@ android {
     applicationVariants.configureEach { variant ->
         variant.outputs.configureEach {
             outputFileName = (outputFileName as String).replace("-release", "")
+            outputFileName = (outputFileName as String).replace("-play", "")
+            outputFileName = (outputFileName as String).replace("-other", "")
         }
     }
 }
@@ -82,8 +91,8 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.6.2'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2'
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.7.4'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.7.4'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.7.5'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.7.5'
     implementation 'androidx.room:room-runtime:2.6.0'
     implementation 'androidx.coordinatorlayout:coordinatorlayout:1.2.0'
     implementation 'androidx.preference:preference-ktx:1.2.1'
@@ -96,14 +105,11 @@ dependencies {
     implementation 'com.blacksquircle.ui:editorkit:2.2.0'
     implementation 'com.blacksquircle.ui:language-json:2.2.0'
 
-    implementation 'com.microsoft.appcenter:appcenter-analytics:5.0.2'
-    implementation 'com.microsoft.appcenter:appcenter-crashes:5.0.2'
-    implementation 'com.microsoft.appcenter:appcenter-distribute:5.0.2'
-
     implementation('org.smali:dexlib2:2.5.2') {
         exclude group: 'com.google.guava', module: 'guava'
     }
-    implementation('com.google.guava:guava:32.1.2-android')
+    implementation 'com.google.guava:guava:32.1.2-android'
+    playImplementation 'com.google.android.play:app-update-ktx:2.1.0'
 }
 
 if (getProps("APPCENTER_TOKEN") != "") {
@@ -115,9 +121,23 @@ if (getProps("APPCENTER_TOKEN") != "") {
         releaseNotes = getProps("RELEASE_NOTES")
         notifyTesters = true
         apps {
-            release {
+            playRelease {
                 appName = getProps("APPCENTER_APP_NAME")
             }
+        }
+    }
+}
+
+def playCredentialsJSON = rootProject.file("service-account-credentials.json")
+if (playCredentialsJSON.exists()) {
+    play {
+        serviceAccountCredentials = playCredentialsJSON
+        defaultToAppBundles = true
+        def version = getProps("VERSION_NAME")
+        if (version.contains("alpha") || version.contains("beta") || version.contains("rc")) {
+            track = 'beta'
+        } else {
+            track = 'production'
         }
     }
 }
