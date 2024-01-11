@@ -6,13 +6,13 @@ git clone https://github.com/rnetx/sing-box sing-box
 cd sing-box
 ##########################
 # 这里可以切换分支
-git checkout dev
+git checkout next
 ##########################
 # 编译 with_clash_ui 需要，其他分支可以注释掉 #########
-make init_yacd
+# make init_yacd
 ####################
 # 这里可以修改 tags
-tags="with_dhcp,with_lwip,with_gvisor,with_v2ray_api,with_quic,with_wireguard,with_utls,with_reality_server,with_clash_api,with_grpc,with_ech,with_proxyprovider,with_ruleprovider,with_clash_dashboard"
+tags="with_gvisor,with_quic,with_utls,with_reality_server,with_clash_api,with_outbound_provider"
 ####################
 ###### !! 不要动 !! ######
 make lib_install
